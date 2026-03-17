@@ -1,0 +1,129 @@
+--%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-- % AUTORES: JUAN SEBASTIAN CHAVARRO
+-- %
+-- % MODULO: BLOQUEMULTIPLY
+-- %
+-- % CREDITOS / MATERIAL BASE:
+-- %   Desarrollo realizado a partir de las explicaciones de clase y del
+-- %   material compartido por el profesor Sebastian Mariño.
+-- %
+-- % PROPOSITO:
+-- %   Implementar un multiplicador binario de 4 bits por 4 bits dentro de
+-- %   un solo codigo VHDL, siguiendo la idea de productos parciales que se
+-- %   trabaja manualmente en la multiplicacion binaria.
+-- %
+-- % ENTRADAS:
+-- %   bin  -> primer numero binario de 4 bits
+-- %   bin2 -> segundo numero binario de 4 bits
+-- %
+-- % SALIDA:
+-- %   result -> resultado de la multiplicacion (8 bits)
+-- %
+-- % IDEA GENERAL:
+-- %   Cada bit de bin2 multiplica todos los bits de bin mediante compuertas
+-- %   AND, generando productos parciales. Estos productos se desplazan
+-- %   segun la posicion del bit del multiplicador y finalmente se suman
+-- %   para obtener el resultado final.
+--%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+----Parte 4 multiplicador--------------------------------------------------------
+---------------------------------------------------------------------------------
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE ieee.numeric_std.all;
+
+ENTITY bloquemultiply IS
+    PORT(
+        bin   : IN  STD_LOGIC_VECTOR(3 DOWNTO 0); -- Primer numero
+        bin2  : IN  STD_LOGIC_VECTOR(3 DOWNTO 0); -- Segundo numero
+        result: OUT STD_LOGIC_VECTOR(6 DOWNTO 0)  -- Resultado final
+    );
+END ENTITY bloquemultiply;
+
+ARCHITECTURE functional OF bloquemultiply IS
+
+    -------------------------------------------------------------------------
+    -- Señales internas para productos parciales
+    -------------------------------------------------------------------------
+    SIGNAL sub1 : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL sub2 : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL sub3 : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL sub4 : STD_LOGIC_VECTOR(7 DOWNTO 0);
+
+    -------------------------------------------------------------------------
+    -- Señales internas para sumas intermedias
+    -------------------------------------------------------------------------
+    SIGNAL suma1 : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL suma2 : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL suma3 : STD_LOGIC_VECTOR(7 DOWNTO 0);
+
+BEGIN
+
+    -------------------------------------------------------------------------
+    -- SUB1
+    -- Producto parcial generado por bin2(0)
+    -- No tiene corrimiento
+    -------------------------------------------------------------------------
+    sub1(0) <= bin(0) AND bin2(0);
+    sub1(1) <= bin(1) AND bin2(0);
+    sub1(2) <= bin(2) AND bin2(0);
+    sub1(3) <= bin(3) AND bin2(0);
+    sub1(4) <= '0';
+    sub1(5) <= '0';
+    sub1(6) <= '0';
+    sub1(7) <= '0';
+
+    -------------------------------------------------------------------------
+    -- SUB2
+    -- Producto parcial generado por bin2(1)
+    -- Corrimiento de 1 posicion
+    -------------------------------------------------------------------------
+    sub2(0) <= '0';
+    sub2(1) <= bin(0) AND bin2(1);
+    sub2(2) <= bin(1) AND bin2(1);
+    sub2(3) <= bin(2) AND bin2(1);
+    sub2(4) <= bin(3) AND bin2(1);
+    sub2(5) <= '0';
+    sub2(6) <= '0';
+    sub2(7) <= '0';
+
+    -------------------------------------------------------------------------
+    -- SUB3
+    -- Producto parcial generado por bin2(2)
+    -- Corrimiento de 2 posiciones
+    -------------------------------------------------------------------------
+    sub3(0) <= '0';
+    sub3(1) <= '0';
+    sub3(2) <= bin(0) AND bin2(2);
+    sub3(3) <= bin(1) AND bin2(2);
+    sub3(4) <= bin(2) AND bin2(2);
+    sub3(5) <= bin(3) AND bin2(2);
+    sub3(6) <= '0';
+    sub3(7) <= '0';
+
+    -------------------------------------------------------------------------
+    -- SUB4
+    -- Producto parcial generado por bin2(3)
+    -- Corrimiento de 3 posiciones
+    -------------------------------------------------------------------------
+    sub4(0) <= '0';
+    sub4(1) <= '0';
+    sub4(2) <= '0';
+    sub4(3) <= bin(0) AND bin2(3);
+    sub4(4) <= bin(1) AND bin2(3);
+    sub4(5) <= bin(2) AND bin2(3);
+    sub4(6) <= bin(3) AND bin2(3);
+    sub4(7) <= '0';
+
+    -------------------------------------------------------------------------
+    -- SUMAS INTERMEDIAS
+    -------------------------------------------------------------------------
+    suma1 <= STD_LOGIC_VECTOR(unsigned(sub1) + unsigned(sub2));
+    suma2 <= STD_LOGIC_VECTOR(unsigned(suma1) + unsigned(sub3));
+    suma3 <= STD_LOGIC_VECTOR(unsigned(suma2) + unsigned(sub4));
+
+    -------------------------------------------------------------------------
+    -- RESULTADO FINAL
+    -------------------------------------------------------------------------
+    result <= suma3(6 downto 0); --Declaro que nuestro resultado será de 7 bits 
+
+END ARCHITECTURE functional;
